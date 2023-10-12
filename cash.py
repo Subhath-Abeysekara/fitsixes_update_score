@@ -14,4 +14,4 @@ def get_pq_empty():
 
 def get_pq():
     global pq
-    return pq.get()
+    return pq.get()[1]

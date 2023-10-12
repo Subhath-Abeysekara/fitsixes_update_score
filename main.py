@@ -6,6 +6,9 @@ import asyncio
 from cash import set_pq, get_pq_empty, get_pq
 import queue
 import time
+
+from score_update import update_match_score
+
 # Create an empty priority queue
 
 app = Flask(__name__)
@@ -17,9 +20,14 @@ def main():
 @app.route("/v1/scoreupdate",methods=["POST"])
 @cross_origin()
 def scoreupdate():
-    score = request.json['score']
-    set_pq(score)
-    return "success"
+    try:
+        score = request.json['score']
+        return update_match_score(score['match_id'], score['key'])
+    except Exception:
+        return {
+            "state":False,
+            "error":Exception
+        }
 
 @app.route("/v1/getscore")
 @cross_origin()
