@@ -71,7 +71,7 @@ def update_match_score(id , key):
             }
         else:
             print(key)
-            if key == 0:
+            if key == 'zero':
                 scorecard = update_dot_ball(match['scorecard'], team=match_state['state'])
             elif key == 'wicket':
                 scorecard = update_wicket(match['scorecard'], team=match_state['state'])
