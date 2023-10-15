@@ -40,12 +40,32 @@ def update_score(scorecard , team , key):
         "ones":1,
         "twos":2,
         "threes":3,
-        "extras":1
+        "fives":5,
+        "sevens":7,
+        "extras_zero":1,
+        "extras_one": 2,
+        "extras_two": 3,
+        "extras_three": 4,
+        "extras_four": 5,
+        "extras_five":6,
+        "extras_six": 7,
+        "extras_seven": 8,
+        "wicket_ones":1,
+        "wicket_twos":2,
+        "wicket_threes":3
     }
-    scorecard[team]['marks'] += score_keys[key]
+    score = score_keys[key]
+    scorecard[team]['marks'] += score
+    keys = key.split('_')
+    key = keys[0]
     if key != 'extras':
         scorecard[team]['balls'] += 1
-    scorecard[team][key] += 1
+        score = 1
+        if key == 'wicket':
+            key = keys[1]
+            scorecard[team]['wickets'] += 1
+    if key != 'fives' and key != 'sevens':
+        scorecard[team][key] += score
     return update_over(scorecard=scorecard , team=team)
 
 def update_dot_ball(scorecard , team):
