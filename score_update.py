@@ -69,7 +69,7 @@ def update_score(scorecard , team , key):
     return update_over(scorecard=scorecard , team=team)
 
 def update_dot_ball(scorecard , team):
-    scorecard[team]['ball'] += 1
+    scorecard[team]['balls'] += 1
     return update_over(scorecard=scorecard , team=team)
 
 def update_match_score(id , key):
