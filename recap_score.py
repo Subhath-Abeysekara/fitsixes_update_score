@@ -1,6 +1,6 @@
 from bson import ObjectId
 
-from cash import set_pq, set_movement
+from cash import set_pq, get_movement_empty, get_movement
 from connection import connect_mongo_match
 from get_live_matches import get_score_cards
 
@@ -9,7 +9,6 @@ collection_name_match = connect_mongo_match()
 def check_match_state(overs , all_out , score_card , first_bat_team , second_bat_team):
     first_bat_score = score_card[first_bat_team]
     second_bat_score = score_card[second_bat_team]
-    print(second_bat_score)
     if (first_bat_score['overs']>=overs or first_bat_score['wickets']>=all_out) and (second_bat_score['overs'] >= overs or second_bat_score['wickets']>=all_out):
         return {
             "state":"finish"
@@ -23,14 +22,14 @@ def check_match_state(overs , all_out , score_card , first_bat_team , second_bat
             "state": first_bat_team
         }
 def update_over(scorecard , team):
-    if scorecard[team]['balls'] >= 6:
-        scorecard[team]['overs']+=1
-        scorecard[team]['balls'] = 0
+    if scorecard[team]['balls'] < 0:
+        scorecard[team]['overs']-=1
+        scorecard[team]['balls'] = 5
     return scorecard
 
 def update_wicket(scorecard , team):
-    scorecard[team]['wickets']+=1
-    scorecard[team]['balls']+=1
+    scorecard[team]['wickets']-=1
+    scorecard[team]['balls']-=1
     return update_over(scorecard=scorecard , team=team)
 
 def update_score(scorecard , team , key):
@@ -56,26 +55,34 @@ def update_score(scorecard , team , key):
         "wicket_threes":3
     }
     score = score_keys[key]
-    scorecard[team]['marks'] += score
+    scorecard[team]['marks'] -= score
     keys = key.split('_')
     key = keys[0]
     if key != 'extras':
-        scorecard[team]['balls'] += 1
+        scorecard[team]['balls'] -= 1
         score = 1
         if key == 'wicket':
             key = keys[1]
-            scorecard[team]['wickets'] += 1
+            scorecard[team]['wickets'] -= 1
     if key != 'fives' and key != 'sevens':
-        scorecard[team][key] += score
+        scorecard[team][key] -= score
     return update_over(scorecard=scorecard , team=team)
 
 def update_dot_ball(scorecard , team):
-    scorecard[team]['balls'] += 1
+    scorecard[team]['balls'] -= 1
     return update_over(scorecard=scorecard , team=team)
 
-def update_match_score(id , key):
+def recap_match_score(id):
     try:
-        print(key)
+        if get_movement_empty():
+            return {
+                "state": False,
+                "message": "No Movements"
+            }
+        else:
+            move = get_movement(id)
+            id = move['id']
+            key = move['key']
         match = collection_name_match.find_one({'_id': ObjectId(id)})
         print(match)
         first_bat_team = match['first_bat']
@@ -83,7 +90,6 @@ def update_match_score(id , key):
         second_bat_team = "team1" if first_bat_team == "team2" else "team2"
         overs = match['overs']
         all_out = match['all_out']
-        print(all_out)
         match_state = check_match_state(overs=overs, all_out=all_out, score_card=match['scorecard'],
                                         first_bat_team=first_bat_team, second_bat_team=second_bat_team)
         print(match_state)
@@ -94,11 +100,6 @@ def update_match_score(id , key):
             }
         else:
             print(key)
-            move = {
-                'id':id,
-                'key':key
-            }
-            set_movement(move=move)
             if key == 'zero':
                 scorecard = update_dot_ball(match['scorecard'], team=match_state['state'])
             elif key == 'wicket':
@@ -120,5 +121,3 @@ def update_match_score(id , key):
             "state": False,
             "error": Exception
         }
-
-# update_match_score("651dbda6e9de5e2d640ca5bf")

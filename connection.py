@@ -45,3 +45,10 @@ def connect_mongo_match():
 #     db_Name = client['fitsixes']
 #     collection_name = db_Name["team"]
 #     return collection_name
+
+def connect_mongo_sensitive():
+    CONNECTION_STRING = env.MONGODB_URL
+    client = MongoClient(CONNECTION_STRING)
+    db_Name = client['fitsixes']
+    collection_name = db_Name["sensitive"]
+    return collection_name
