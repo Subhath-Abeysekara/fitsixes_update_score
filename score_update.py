@@ -22,18 +22,18 @@ def check_match_state(overs , all_out , score_card , first_bat_team , second_bat
         return {
             "state": first_bat_team
         }
-def update_over(scorecard , team):
-    if scorecard[team]['balls'] >= 6:
+def update_over(scorecard , team , balls_per_over):
+    if scorecard[team]['balls'] >= balls_per_over:
         scorecard[team]['overs']+=1
         scorecard[team]['balls'] = 0
     return scorecard
 
-def update_wicket(scorecard , team):
+def update_wicket(scorecard , team,balls_per_over):
     scorecard[team]['wickets']+=1
     scorecard[team]['balls']+=1
-    return update_over(scorecard=scorecard , team=team)
+    return update_over(scorecard=scorecard , team=team,balls_per_over=balls_per_over)
 
-def update_score(scorecard , team , key):
+def update_score(scorecard , team , key , balls_per_over):
     print(scorecard[team])
     score_keys = {
         "sixes":6,
@@ -67,11 +67,11 @@ def update_score(scorecard , team , key):
             scorecard[team]['wickets'] += 1
     if key != 'fives' and key != 'sevens':
         scorecard[team][key] += score
-    return update_over(scorecard=scorecard , team=team)
+    return update_over(scorecard=scorecard , team=team,balls_per_over=balls_per_over)
 
-def update_dot_ball(scorecard , team):
+def update_dot_ball(scorecard , team,balls_per_over):
     scorecard[team]['balls'] += 1
-    return update_over(scorecard=scorecard , team=team)
+    return update_over(scorecard=scorecard , team=team,balls_per_over=balls_per_over)
 
 def update_match_score(id , key):
     try:
@@ -83,6 +83,7 @@ def update_match_score(id , key):
         second_bat_team = "team1" if first_bat_team == "team2" else "team2"
         overs = match['overs']
         all_out = match['all_out']
+        balls_per_over = match['balls_per_over']
         print(all_out)
         match_state = check_match_state(overs=overs, all_out=all_out, score_card=match['scorecard'],
                                         first_bat_team=first_bat_team, second_bat_team=second_bat_team)
@@ -100,11 +101,11 @@ def update_match_score(id , key):
             }
             set_movement(move=move)
             if key == 'zero':
-                scorecard = update_dot_ball(match['scorecard'], team=match_state['state'])
+                scorecard = update_dot_ball(match['scorecard'], team=match_state['state'],balls_per_over=balls_per_over)
             elif key == 'wicket':
-                scorecard = update_wicket(match['scorecard'], team=match_state['state'])
+                scorecard = update_wicket(match['scorecard'], team=match_state['state'],balls_per_over=balls_per_over)
             else:
-                scorecard = update_score(match['scorecard'], team=match_state['state'], key=key)
+                scorecard = update_score(match['scorecard'], team=match_state['state'], key=key,balls_per_over=balls_per_over)
             print(scorecard)
             result = collection_name_match.update_one({'_id': ObjectId(id)},{"$set":{'scorecard':scorecard}})
             print(result.upserted_id)
