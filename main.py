@@ -11,7 +11,7 @@ from apscheduler.triggers.cron import CronTrigger
 import asyncio
 
 import env
-from cash import set_pq, get_pq_empty, get_pq
+from cash import set_pq, get_pq_empty, get_pq, remove_match
 import queue
 import time
 
@@ -55,6 +55,11 @@ def scoreget():
 @cross_origin()
 def recapscore(id):
     return recap_match_score(id)
+
+@app.route("/v1/remove/<id>")
+@cross_origin()
+def clear_moves(id):
+    return remove_match(id)
 
 scheduler = BackgroundScheduler()
 scheduler.start()

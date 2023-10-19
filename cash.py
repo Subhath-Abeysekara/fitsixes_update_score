@@ -46,6 +46,17 @@ def last_move_get(id):
         other_data.append(move)
     movements = other_data
     return data
+
+def remove_match(id):
+    global movements
+    filter_key = "id"
+    filter_value = id
+    other_data = [d for d in movements if d.get(filter_key) != filter_value]
+    movements = other_data
+    return {
+        "state":True,
+        "message":"success"
+    }
 def set_movement(move):
     global movements
     move['no'] = next_move_no(move['id'])
