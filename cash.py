@@ -2,7 +2,7 @@ import queue
 import time
 
 pq = queue.PriorityQueue()
-movements = queue.PriorityQueue()
+movements = []
 def set_pq(score):
     global pq
     time_ = time.time()
@@ -19,24 +19,50 @@ def get_pq():
 
 # ******** Movements *******
 
+def next_move_no(id):
+    global movements
+    filter_key = "id"
+    filter_value = id
+    filtered_data = [d for d in movements if d.get(filter_key) == filter_value]
+    print(filtered_data)
+    sort_key = "no"
+    sorted_data = sorted(filtered_data, key=lambda x: x[sort_key])
+    if sorted_data != []:
+        last_no = sorted_data.pop()['no']
+    else:
+        last_no = 0
+    return last_no+1
+
+def last_move_get(id):
+    global movements
+    filter_key = "id"
+    filter_value = id
+    filtered_data = [d for d in movements if d.get(filter_key) == filter_value]
+    other_data = [d for d in movements if d.get(filter_key) != filter_value]
+    sort_key = "no"
+    sorted_data = sorted(filtered_data, key=lambda x: x[sort_key])
+    data =  sorted_data.pop()
+    for move in sorted_data:
+        other_data.append(move)
+    movements = other_data
+    return data
 def set_movement(move):
     global movements
-    time_ = time.time()
-    movements.put((time_, move))
+    move['no'] = next_move_no(move['id'])
+    movements.append(move)
     return
-
-def get_movement_empty():
+def get_movement_empty(id):
     global movements
-    return movements.empty()
+    filter_key = "id"
+    filter_value = id
+    filtered_data = [d for d in movements if d.get(filter_key) == filter_value]
+    sort_key = "no"
+    sorted_data = sorted(filtered_data, key=lambda x: x[sort_key])
+    if sorted_data == []:
+        return True
+    return False
 
 def get_movement(id):
     global movements
-    moves = []
-    while True:
-        move = movements.get()
-        if move[1]['id'] == id:
-            for i in moves[::-1]:
-                set_movement(i)
-            return move[1]
-        else:
-            moves.append(move)
+    last_move = last_move_get(id)
+    return last_move

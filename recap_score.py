@@ -74,7 +74,7 @@ def update_dot_ball(scorecard , team):
 
 def recap_match_score(id):
     try:
-        if get_movement_empty():
+        if get_movement_empty(id):
             return {
                 "state": False,
                 "message": "No Movements"
@@ -83,6 +83,7 @@ def recap_match_score(id):
             move = get_movement(id)
             id = move['id']
             key = move['key']
+        print(key)
         match = collection_name_match.find_one({'_id': ObjectId(id)})
         print(match)
         first_bat_team = match['first_bat']

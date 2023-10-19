@@ -78,7 +78,7 @@ def scheduled_task():
 # Schedule the task to run every minute
 app.apscheduler.add_job(
     scheduled_task,
-    trigger=IntervalTrigger(seconds=10),
+    trigger=IntervalTrigger(seconds=5),
     id='scheduled_task',
     name='Scheduled Task'
 )
